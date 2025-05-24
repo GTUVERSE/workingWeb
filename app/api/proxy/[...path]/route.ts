@@ -1,19 +1,38 @@
 import { type NextRequest, NextResponse } from "next/server"
 
-// Backend API URL'iniz
 const API_URL = "http://localhost:18080"
+function getTokenFromRequest(req: NextRequest): string | null {
+  const authHeader = req.headers.get("authorization")
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    return authHeader
+  }
+  return null
+}
 
-export async function GET(request: NextRequest, { params }: { params: { path: string[] } }) {
+function isPromise(obj: any): obj is Promise<any> {
+  return !!obj && typeof obj.then === "function"
+}
+
+async function getParams(contextOrPromise: any) {
+  if (isPromise(contextOrPromise)) {
+    return (await contextOrPromise).params
+  }
+  return contextOrPromise.params
+}
+
+export async function GET(request: NextRequest, context: any) {
+  const params = await getParams(context)
   const path = params.path.join("/")
   const url = new URL(request.url)
   const queryString = url.search
-
-  console.log(`Proxying GET request to: ${API_URL}/${path}${queryString}`)
+  const token = getTokenFromRequest(request)
 
   try {
     const response = await fetch(`${API_URL}/${path}${queryString}`, {
+      method: "GET",
       headers: {
         "Content-Type": "application/json",
+        ...(token ? { Authorization: token } : {}),
       },
       cache: "no-store",
     })
@@ -23,28 +42,40 @@ export async function GET(request: NextRequest, { params }: { params: { path: st
     }
 
     if (!response.ok) {
-      return NextResponse.json({ error: `API returned ${response.status}` }, { status: response.status })
+      let errorText
+      try {
+        errorText = await response.text()
+      } catch {
+        errorText = "API error"
+      }
+      return NextResponse.json({ error: errorText }, { status: response.status })
     }
 
-    const data = await response.json()
-    return NextResponse.json(data)
+    let data
+    try {
+      data = await response.json()
+    } catch {
+      data = await response.text()
+    }
+    return NextResponse.json({ data })
   } catch (error) {
     console.error("Proxy error:", error)
     return NextResponse.json({ error: "Failed to fetch from API" }, { status: 500 })
   }
 }
 
-export async function POST(request: NextRequest, { params }: { params: { path: string[] } }) {
+export async function POST(request: NextRequest, context: any) {
+  const params = await getParams(context)
   const path = params.path.join("/")
+  const token = getTokenFromRequest(request)
 
   try {
     const body = await request.json()
-    console.log(`Proxying POST request to: ${API_URL}/${path}`, body)
-
     const response = await fetch(`${API_URL}/${path}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        ...(token ? { Authorization: token } : {}),
       },
       body: JSON.stringify(body),
     })
@@ -54,27 +85,39 @@ export async function POST(request: NextRequest, { params }: { params: { path: s
     }
 
     if (!response.ok) {
-      return NextResponse.json({ error: `API returned ${response.status}` }, { status: response.status })
+      let errorText
+      try {
+        errorText = await response.text()
+      } catch {
+        errorText = "API error"
+      }
+      return NextResponse.json({ error: errorText }, { status: response.status })
     }
 
-    const data = await response.json()
-    return NextResponse.json(data)
+    let data
+    try {
+      data = await response.json()
+    } catch {
+      data = await response.text()
+    }
+    return NextResponse.json({ data })
   } catch (error) {
     console.error("Proxy error:", error)
     return NextResponse.json({ error: "Failed to fetch from API" }, { status: 500 })
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { path: string[] } }) {
+export async function DELETE(request: NextRequest, context: any) {
+  const params = await getParams(context)
   const path = params.path.join("/")
+  const token = getTokenFromRequest(request)
 
   try {
-    console.log(`Proxying DELETE request to: ${API_URL}/${path}`)
-
     const response = await fetch(`${API_URL}/${path}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
+        ...(token ? { Authorization: token } : {}),
       },
     })
 
@@ -83,11 +126,22 @@ export async function DELETE(request: NextRequest, { params }: { params: { path:
     }
 
     if (!response.ok) {
-      return NextResponse.json({ error: `API returned ${response.status}` }, { status: response.status })
+      let errorText
+      try {
+        errorText = await response.text()
+      } catch {
+        errorText = "API error"
+      }
+      return NextResponse.json({ error: errorText }, { status: response.status })
     }
 
-    const data = await response.json()
-    return NextResponse.json(data)
+    let data
+    try {
+      data = await response.json()
+    } catch {
+      data = await response.text()
+    }
+    return NextResponse.json({ data })
   } catch (error) {
     console.error("Proxy error:", error)
     return NextResponse.json({ error: "Failed to fetch from API" }, { status: 500 })

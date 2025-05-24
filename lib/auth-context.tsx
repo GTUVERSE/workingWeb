@@ -45,90 +45,91 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [user])
 
-  const login = async (credentials: { username: string; password: string }) => {
-    setIsLoading(true)
-    setError(null)
+ const login = async (credentials: { username: string; password: string }) => {
+  setIsLoading(true)
+  setError(null)
 
-    try {
-      const response = await userAPI.login(credentials)
+  try {
+    const response = await userAPI.login(credentials)
+    console.log("LOGIN RESPONSE:", response)
 
-      if (response.user && response.token) {
-        const loggedInUser = {
-          id: response.user.id,
-          username: response.user.username,
-          email: response.user.email,
-          avatar: response.user.avatar || `/placeholder.svg?height=40&width=40`,
-          token: response.token,
-        }
+    const data = response.data || response
 
-        setUser(loggedInUser)
-        router.push("/")
-      } else {
-        throw new Error("Invalid response from server")
+    if ((data.id || data.username) && !data.error) {
+      // Backend sadece kullanıcıyı dönüyor, token yok
+      const loggedInUser = {
+        id: data.id,
+        username: data.username,
+        email: data.email,
+        avatar: data.avatar || `/placeholder.svg?height=40&width=40`,
+        token: "", // token yoksa boş bırak
       }
-    } catch (err) {
-      console.error("Login error:", err)
-      setError("Giriş başarısız. Lütfen kullanıcı adı ve şifrenizi kontrol edin.")
 
-      // Fallback for development
-      if (process.env.NODE_ENV === "development") {
-        console.warn("Using mock login in development mode")
-        const mockUser = {
-          id: "user-" + Math.random().toString(36).substr(2, 9),
-          username: credentials.username,
-          avatar: `/placeholder.svg?height=40&width=40`,
-          token: "mock-token",
-        }
-        setUser(mockUser)
-        router.push("/")
+      setUser(loggedInUser)
+      router.push("/")
+    } else if (data.user && data.token) {
+      // Backend token ve user döndü
+      const loggedInUser = {
+        id: data.user.id,
+        username: data.user.username,
+        email: data.user.email,
+        avatar: data.user.avatar || `/placeholder.svg?height=40&width=40`,
+        token: data.token,
       }
-    } finally {
-      setIsLoading(false)
+      setUser(loggedInUser)
+      router.push("/")
+    } else if (data.error) {
+      setError(data.error)
+    } else {
+      throw new Error("Invalid response from server")
     }
+  } catch (err) {
+    console.error("Login error:", err)
+    setError("Giriş başarısız. Lütfen kullanıcı adı ve şifrenizi kontrol edin.")
+  } finally {
+    setIsLoading(false)
   }
+}
 
-  const register = async (credentials: { username: string; email: string; password: string }) => {
-    setIsLoading(true)
-    setError(null)
+const register = async (credentials: { username: string; email: string; password: string }) => {
+  setIsLoading(true)
+  setError(null)
 
-    try {
-      const response = await userAPI.register(credentials)
+  try {
+    const response = await userAPI.register(credentials)
+    console.log("REGISTER RESPONSE:", response)
 
-      if (response.user && response.token) {
-        const registeredUser = {
-          id: response.user.id,
-          username: response.user.username,
-          email: response.user.email,
-          avatar: response.user.avatar || `/placeholder.svg?height=40&width=40`,
-          token: response.token,
-        }
+    // Hem { data: "Registered" } hem "Registered" için kontrol et
+    const data = response.data || response
 
-        setUser(registeredUser)
-        router.push("/")
-      } else {
-        throw new Error("Invalid response from server")
+    if (data.user && data.token) {
+      const registeredUser = {
+        id: data.user.id,
+        username: data.user.username,
+        email: data.user.email,
+        avatar: data.user.avatar || `/placeholder.svg?height=40&width=40`,
+        token: data.token,
       }
-    } catch (err) {
-      console.error("Registration error:", err)
-      setError("Kayıt başarısız. Lütfen farklı bir kullanıcı adı deneyin veya daha sonra tekrar deneyin.")
-
-      // Fallback for development
-      if (process.env.NODE_ENV === "development") {
-        console.warn("Using mock registration in development mode")
-        const mockUser = {
-          id: "user-" + Math.random().toString(36).substr(2, 9),
-          username: credentials.username,
-          email: credentials.email,
-          avatar: `/placeholder.svg?height=40&width=40`,
-          token: "mock-token",
-        }
-        setUser(mockUser)
-        router.push("/")
-      }
-    } finally {
-      setIsLoading(false)
+      setUser(registeredUser)
+      router.push("/")
+    } else if (
+      (typeof data === "string" && data.includes("Registered")) ||
+      (typeof data === "object" && typeof data.data === "string" && data.data.includes("Registered"))
+    ) {
+      // Başarılı kayıt düz metin döndü
+      router.push("/login")
+    } else if (data.error) {
+      setError(data.error)
+    } else {
+      throw new Error("Invalid response from server")
     }
+  } catch (err) {
+    console.error("Registration error:", err)
+    setError("Kayıt başarısız. Lütfen farklı bir kullanıcı adı deneyin veya daha sonra tekrar deneyin.")
+  } finally {
+    setIsLoading(false)
   }
+}
 
   const logout = () => {
     // API çağrısı gerekiyorsa burada yapılabilir

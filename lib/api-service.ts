@@ -1,7 +1,7 @@
-// API endpoint'leri için temel URL
-const API_URL = "/api/proxy" // Next.js API proxy'mizi kullanıyoruz
+// File: lib/api.ts
 
-// API isteği için yardımcı fonksiyon
+const API_URL = "/api/proxy"
+
 const fetchAPI = async (endpoint: string, options: RequestInit = {}) => {
   try {
     console.log(`Fetching: ${API_URL}/${endpoint}`)
@@ -15,7 +15,6 @@ const fetchAPI = async (endpoint: string, options: RequestInit = {}) => {
 
     console.log(`Response status: ${response.status}`)
 
-    // 204 No Content yanıtı için boş dizi döndür
     if (response.status === 204) {
       return []
     }
@@ -26,7 +25,6 @@ const fetchAPI = async (endpoint: string, options: RequestInit = {}) => {
 
     const text = await response.text()
 
-    // Boş yanıt kontrolü
     if (!text.trim()) {
       return {}
     }
@@ -44,17 +42,16 @@ const fetchAPI = async (endpoint: string, options: RequestInit = {}) => {
   }
 }
 
-// Kullanıcı API'si
 export const userAPI = {
-  login: async (credentials: { username: string; password: string }) => {
-    return fetchAPI("auth/login", {
+ login: async (credentials: { username: string; password: string }) => {
+    return fetchAPI("login", {
       method: "POST",
       body: JSON.stringify(credentials),
     })
   },
 
   register: async (userData: { username: string; email: string; password: string }) => {
-    return fetchAPI("auth/register", {
+    return fetchAPI("register", {
       method: "POST",
       body: JSON.stringify(userData),
     })
@@ -64,15 +61,15 @@ export const userAPI = {
     return fetchAPI(`users/${userId}`)
   },
 
-  updateProfile: async (userId: string, profileData: any) => {
-    return fetchAPI(`users/${userId}`, {
-      method: "PUT",
-      body: JSON.stringify(profileData),
-    })
+  getAll: async () => {
+    return fetchAPI("users")
+  },
+
+  getUserRooms: async (userId: string) => {
+    return fetchAPI(`users/${userId}/rooms`)
   },
 }
 
-// Odalar (Kulüpler) API'si
 export const roomsAPI = {
   getAll: async () => {
     return fetchAPI("rooms")
@@ -102,22 +99,24 @@ export const roomsAPI = {
     })
   },
 
-  join: async (roomId: string, userId: string) => {
-    return fetchAPI(`rooms/${roomId}/join`, {
+  addUser: async (roomId: string, userId: number) => {
+    return fetchAPI(`rooms/${roomId}/users`, {
       method: "POST",
-      body: JSON.stringify({ userId }),
+      body: JSON.stringify({ user_id: userId }),
     })
   },
 
-  leave: async (roomId: string, userId: string) => {
-    return fetchAPI(`rooms/${roomId}/leave`, {
-      method: "POST",
-      body: JSON.stringify({ userId }),
+  getRoomUsers: async (roomId: string) => {
+    return fetchAPI(`rooms/${roomId}/users`)
+  },
+
+  removeUser: async (roomId: string, userId: number) => {
+    return fetchAPI(`rooms/${roomId}/users/${userId}`, {
+      method: "DELETE",
     })
   },
 }
 
-// Akış (Stream) API'si
 export const streamAPI = {
   getAll: async () => {
     return fetchAPI("streams")
@@ -148,7 +147,6 @@ export const streamAPI = {
   },
 }
 
-// Mesaj API'si
 export const messageAPI = {
   getRoomMessages: async (roomId: string) => {
     return fetchAPI(`messages/room/${roomId}`)
