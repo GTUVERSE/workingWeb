@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
 import { Users, Music } from "lucide-react"
@@ -34,47 +34,13 @@ export function ClubsGrid() {
 
         if (Array.isArray(data)) {
           setRooms(data)
+        } else if (data.rooms && Array.isArray(data.rooms)) {
+          setRooms(data.rooms)
         } else {
-          console.error("Expected array but got:", data)
-          throw new Error("Invalid data format")
+          setError("Oda verisi alınamadı.")
         }
-      } catch (err) {
-        console.error("Failed to fetch rooms:", err)
-        setError("Odaları yüklerken bir hata oluştu.")
-
-        // Fallback mock data
-        setRooms([
-          {
-            id: 1,
-            name: "Neon Lounge",
-            host: "DJ Virtual",
-            size: 5,
-            capacity: 8,
-            genre: "Electronic",
-            tags: ["Dance", "Party"],
-            thumbnail: "/placeholder.svg?height=180&width=320",
-          },
-          {
-            id: 2,
-            name: "Virtual Beats",
-            host: "DJ Pixel",
-            size: 3,
-            capacity: 8,
-            genre: "House",
-            tags: ["Dance", "Avatars"],
-            thumbnail: "/placeholder.svg?height=180&width=320",
-          },
-          {
-            id: 3,
-            name: "Digital Disco",
-            host: "DJ Binary",
-            size: 7,
-            capacity: 8,
-            genre: "Disco",
-            tags: ["Retro", "Dance"],
-            thumbnail: "/placeholder.svg?height=180&width=320",
-          },
-        ])
+      } catch {
+        setError("Oda verisi alınamadı.")
       } finally {
         setLoading(false)
       }

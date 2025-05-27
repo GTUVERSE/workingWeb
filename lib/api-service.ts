@@ -72,7 +72,13 @@ export const userAPI = {
 
 export const roomsAPI = {
   getAll: async () => {
-    return fetchAPI("rooms")
+    const res = await fetch("http://localhost:18080/rooms")
+    const text = await res.text()
+    try {
+      return JSON.parse(text)
+    } catch {
+      return []
+    }
   },
 
   getById: async (roomId: string) => {

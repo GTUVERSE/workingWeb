@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+import MusicPlayer from "@/components/MusicPlayer"
 
 import { useState, useEffect, useRef } from "react"
 import { useParams } from "next/navigation"
@@ -178,6 +179,11 @@ export default function ClubPage() {
 
         <main className="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-4 p-4 bg-gradient-to-b from-black to-zinc-900">
           {/* Video Player */}
+          
+            <div className="lg:col-span-4 mb-4">
+            <MusicPlayer />
+            </div>
+
           <div className="lg:col-span-3 space-y-4">
             <div className="relative aspect-video bg-zinc-900 rounded-lg overflow-hidden">
               {/* This is where you would embed the avatar video */}
