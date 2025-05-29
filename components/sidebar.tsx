@@ -245,20 +245,7 @@ export function Sidebar() {
         )}
       </div>
 
-      <div className="p-4 border-t border-purple-900/50">
-        <h2 className="font-semibold text-sm mb-2 text-purple-300">POPULAR GENRES</h2>
-        <div className="grid grid-cols-2 gap-2">
-          {["Electronic", "House", "Techno", "Hip-Hop", "Pop", "Ambient"].map((genre, index) => (
-            <div
-              key={index}
-              className="text-xs p-1 hover:bg-purple-900/30 rounded cursor-pointer flex items-center gap-1 text-purple-200"
-            >
-              <Music className="h-3 w-3" />
-              {genre}
-            </div>
-          ))}
-        </div>
-      </div>
+    
     </aside>
   )
 }

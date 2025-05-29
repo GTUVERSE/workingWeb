@@ -300,18 +300,7 @@ export default function ClubPage() {
             </div>
           </div>
 
-          <div className="lg:col-span-1 flex flex-col h-[calc(100vh-8rem)] border border-purple-900/30 rounded-lg overflow-hidden bg-zinc-900/50">
-            <div className="p-3 border-b border-purple-900/30 flex items-center gap-2 bg-zinc-900 sticky top-0"> <MessageSquare className="h-4 w-4 text-purple-400" /> <h2 className="font-semibold text-purple-200">Kulüp Sohbeti</h2> </div>
-            <div className="flex-1 overflow-y-auto p-3 space-y-3">
-              {messages.length > 0 ? messages.map((msg) => (
-                <div key={msg.id} className="flex gap-2 items-start"> <span className="font-semibold text-sm text-purple-400 flex-shrink-0">{msg.username}:</span> <span className="text-sm text-purple-200 break-all">{msg.content}</span> </div>
-              )) : ( <p className="text-sm text-purple-400 text-center py-4">Henüz mesaj yok. İlk mesajı sen gönder!</p> )}
-            </div>
-            <form onSubmit={handleSendMessage} className="p-3 border-t border-purple-900/30 flex gap-2 bg-zinc-900 sticky bottom-0">
-              <Input type="text" placeholder={user ? "Bir mesaj gönder..." : "Mesaj göndermek için giriş yapın"} value={chatMessage} onChange={(e) => setChatMessage(e.target.value)} className="flex-1 bg-zinc-800 border-purple-900/50 text-purple-100 placeholder:text-purple-400/50 focus:ring-purple-500 focus:border-purple-500" disabled={!user} />
-              <Button type="submit" size="sm" className="bg-purple-600 hover:bg-purple-700 text-white" disabled={!user || !chatMessage.trim()}> Gönder </Button>
-            </form>
-          </div>
+        
         </main>
       </div>
     </div>
