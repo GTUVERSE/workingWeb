@@ -179,17 +179,3 @@ export const streamAPI = {
     });
   },
 };
-
-// --- Message API ---
-export const messageAPI = {
-  getRoomMessages: async (roomId: string | number) => {
-    return fetchAPI(`messages/room/${roomId}`);
-  },
-
-  sendMessage: async (roomId: string | number, message: { userId: string | number; content: string }) => {
-    return fetchAPI(`messages/room/${roomId}`, {
-      method: "POST",
-      body: JSON.stringify(message),
-    });
-  },
-};
